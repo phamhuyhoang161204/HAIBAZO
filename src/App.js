@@ -2,51 +2,62 @@ import { useState, useEffect } from 'react';
 import './App.css';
 
 function App() {
-  const initialNumbers = []
+  const initialNumbers = [];
   for (let i = 1; i <= 10; i++) {
-    initialNumbers.push(i)
+    initialNumbers.push(i);
   }
+
   const [numbers, setNumbers] = useState(initialNumbers);
   const [point, setPoint] = useState(0);
-  const [times, setTimes] = useState(0)
-  const [isPlay, setIsPlay] = useState(false)
+  const [times, setTimes] = useState(0);
+  const [isPlay, setIsPlay] = useState(false);
+  const [expectedNumber, setExpectedNumber] = useState(1); 
 
   const handleReset = () => {
-    setNumbers(initialNumbers);
+    const shuffled = [...initialNumbers].sort(() => Math.random() - 0.5); // 👈 thêm vào reset nếu muốn
+    setNumbers(shuffled);
     setPoint(0);
-    setTimes(0)
-    setIsPlay(false)
-  }
+    setTimes(0);
+    setIsPlay(false);
+    setExpectedNumber(1);
+  };
+
   const handleStart = () => {
     if (!isPlay) {
+      const shuffled = [...initialNumbers].sort(() => Math.random() - 0.5);
+      setNumbers(shuffled);
       setIsPlay(true);
-      setTimes(0)
+      setTimes(0);
+      setExpectedNumber(1); 
     }
-  }
+  };
+
   useEffect(() => {
-    let timesId
+    let timesId;
     if (isPlay) {
       timesId = setInterval(() => {
-        setTimes((prev) => prev + 1)
-      }, 1000)
+        setTimes((prev) => prev + 1);
+      }, 1000);
     }
-    return () => clearInterval(timesId)
+    return () => clearInterval(timesId);
   }, [isPlay]);
+
   const handleClickNumber = (number) => {
     if (!isPlay) return;
 
 
+    if (number !== expectedNumber) return;
+
     setNumbers((prevNumber) => {
       const updatedNumbers = prevNumber.filter((n) => n !== number);
-
       if (updatedNumbers.length === 0) {
         setIsPlay(false);
       }
-
       return updatedNumbers;
     });
 
     setPoint((prevPoint) => prevPoint + 1);
+    setExpectedNumber((prev) => prev + 1); 
   };
 
   return (
@@ -63,7 +74,11 @@ function App() {
       <div className="play-area">
         {numbers.length > 0 ? (
           numbers.map((number) => (
-            <div key={number} onClick={() => handleClickNumber(number)} className="circle">
+            <div
+              key={number}
+              onClick={() => handleClickNumber(number)}
+              className={`circle ${number === expectedNumber ? 'active' : 'disabled'}`}
+            >
               {number}
             </div>
           ))
@@ -71,9 +86,8 @@ function App() {
           <div className="clear">ALL CLEARED!</div>
         )}
       </div>
-
     </div>
-  )
+  );
 }
 
 export default App;
